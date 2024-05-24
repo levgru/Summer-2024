@@ -13,7 +13,7 @@ import numpy as np
 wm_arr_15 = []
 wpl_15 = []
 chi_arr = []
-with open('psi_chisweep_15eta.csv', 'r') as f:
+with open('stu_states/psi_chisweep_15eta.csv', 'r') as f:
     reader = csv.DictReader(f)
     for row in reader:
         wm_arr_15.append(ast.literal_eval(row['W'])[0])
@@ -80,7 +80,7 @@ Extra code below, replace the plotting code above with it in order to plot witne
 # ax.plot(eta_arr, wpl, color = 'red', label = 'Min $W\prime$ Witness')
 # ax.axhline(0, color='black', linewidth=0.5) 
 # ax.set_title('$\chi = 45\degree$', fontsize=33)
-# ax.set_ylabel('Witness value', fontsize=31)
+# ax.set_ylabel('Witness value';, fontsize=31)
 # ax.tick_params(axis='both', which='major', labelsize=25)
 # ax.legend(ncol=2, fontsize=25, loc = 'upper right')
 # ax.set_xlabel('$\eta$', fontsize=31)
