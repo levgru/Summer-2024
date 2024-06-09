@@ -90,7 +90,7 @@ they might be nonzero
 
 def get_params(alpha, beta):
     """
-    Take in two angles alpha and beta in radians where the created state is cos(alpha)*Psi_plus + (e^i*beta)*sin(alpha)*Psi_minus
+    Take in two angles alpha and beta in radians where the created state is cos(alpha)*Phi_plus + (e^i*beta)*sin(alpha)*Phi_minus
     and returns the measurement angles that the HWP and QWP need to be set at per the notes for state creation.
 
     Parameters
@@ -171,13 +171,13 @@ def QP_sweep(m:Manager, HWP_angle, QWP_angle, num):
     '''
 
     # set the output file for manager
-    # m.new_output(f"int_state_sweep/QP_sweep_{num}.csv")
+    # m.new_output(f"int_state_sweep_WP3_2_phi45_sweep/QP_sweep_{num}.csv")
     # find a way to name file with alpha and beta
 
     # set the creation state to phi plus
     print(m.time, "Setting creation state to phi plus")
-    m.make_state('phi_plus')
-    m.log(f'configured phi_plus: {m._config["state_presets"]["phi_plus"]}')
+    m.make_state('phi_minus')
+    m.log(f'configured phi_minus: {m._config["state_presets"]["phi_minus"]}')
 
     # turn alice's measurement plates to measure (H+V)/sqrt(2)
     print(m.time, "Turning Alice's measurement plates")
@@ -189,13 +189,13 @@ def QP_sweep(m:Manager, HWP_angle, QWP_angle, num):
 
     # sweep the QP to determine the minimum count angle
     # sweeps through negative angles so that laser reflection points inward, if the counts are higher when the QP sweeps the other way, sweep positive
-    m.sweep("C_QP", -35, -1.7, 25, 5, 3) #Sometimes the minimum is near the edge of the bounds in which case you won't get a parabola/normal angle. 
+    m.sweep("C_QP", -35, -20, 20, 5, 3) #Sometimes the minimum is near the edge of the bounds in which case you won't get a parabola/normal angle. 
 
     print(m.time, "Sweep complete")
 
     # read the data into a dataframe
-    df = m.output_data(f"int_state_sweep/QP_sweep_{num}.csv")
-    data = pd.read_csv(f"int_state_sweep/QP_sweep_{num}.csv")
+    df = m.output_data(f"int_state_sweep_WP3_2/QP_sweep_{num}.csv")
+    data = pd.read_csv(f"int_state_sweep_WP3_2/QP_sweep_{num}.csv")
     
     # shuts down the manager
     # m.shutdown()
@@ -272,7 +272,7 @@ def UVHWP_sweep(m:Manager, ratio, num):
 
     PCT1 = ratio
 
-    # m.new_output(f"int_state_sweep/UVHWP_balance_sweep1_{num}.csv")
+    # m.new_output(f"int_state_sweep_WP3_2/UVHWP_balance_sweep1_{num}.csv")
 
     # configure measurement basis
     print(m.time, f'Configuring measurement basis {BASIS1}')
@@ -283,10 +283,10 @@ def UVHWP_sweep(m:Manager, ratio, num):
     m.sweep(COMPONENT, GUESS-RANGE, GUESS+RANGE, N, *SAMP)
 
     # obtain the first round of data and switch to a new output file
-    df1 = m.output_data(f"int_state_sweep/UVHWP_balance_sweep1_{num}.csv")
-    data1 = pd.read_csv(f"int_state_sweep/UVHWP_balance_sweep1_{num}.csv")
+    df1 = m.output_data(f"int_state_sweep_WP3_2/UVHWP_balance_sweep1_{num}.csv")
+    data1 = pd.read_csv(f"int_state_sweep_WP3_2/UVHWP_balance_sweep1_{num}.csv")
     # data1 = m.close_output()
-    # m.new_output(f'int_state_sweep/UVHWP_balance_sweep2_{num}.csv')
+    # m.new_output(f'int_state_sweep_WP3_2/UVHWP_balance_sweep2_{num}.csv')
 
     # sweep in the second basis
     print(m.time, f'Configuring measurement basis {BASIS2}')
@@ -297,8 +297,8 @@ def UVHWP_sweep(m:Manager, ratio, num):
 
     print(m.time, 'Data collected, shutting down...')
     # data2 = m.close_output()
-    df2 = m.output_data(f'int_state_sweep/UVHWP_balance_sweep2_{num}.csv')
-    data2 = pd.read_csv(f'int_state_sweep/UVHWP_balance_sweep2_{num}.csv')
+    df2 = m.output_data(f'int_state_sweep_WP3_2/UVHWP_balance_sweep2_{num}.csv')
+    data2 = pd.read_csv(f'int_state_sweep_WP3_2/UVHWP_balance_sweep2_{num}.csv')
     
     print(m.time, 'Data collection complete and manager shut down, beginning analysis...')
     # m.shutdown()
@@ -377,8 +377,8 @@ def state_tomo(m, C_UV_HWP_ang, C_QP_ang, B_C_HWP_ang):
     m.close_output()
 
 if __name__ == '__main__':
-
-    alphas = [np.pi/12]
+    # makes psi+ state, sweeping over phase values
+    alphas = [np.pi/4]
     betas = np.linspace(0.001, np.pi/2, 6)
     states_names = []
     states = []
@@ -388,15 +388,13 @@ if __name__ == '__main__':
             states_names.append((np.rad2deg(alpha), np.rad2deg(beta)))
             states.append((alpha, beta))
 
+        # select only data points3:]
+    states = states[5:]
+    states_names= states_names[5:]
+
     SAMP = (5, 1)
     m = Manager()
-    
-    '''
-    fix file duplicate naming issue
-    '''
-    # to get last 3 rhos, due to bug out after first 3
-    #states_names = states_names[3:]
-    #states = states[3:]
+
     # main loop for iterating over states
     for i, state_n in enumerate(states_names):
         state = states[i]
@@ -407,19 +405,19 @@ if __name__ == '__main__':
 
         meas_HWP_angle, meas_QWP_angle, HH_frac = get_params(state[0], state[1])
 
-        C_QP_angle = QP_sweep(m,meas_HWP_angle,meas_QWP_angle, i)
+        C_QP_angle = QP_sweep(m,meas_HWP_angle,meas_QWP_angle, i) # +4 added when apparatus bugged after 4 trials taken
 
         m.C_QP.goto(C_QP_angle)
 
         UVHWP_angle = UVHWP_sweep(m, HH_frac, i)
 
-        # m.new_output(f'int_state_sweep/sweep_data_{state}.csv')
+        # m.new_output(f'int_state_sweep_WP3_2/sweep_data_{state}.csv')
 
         m.configure_motors(
             C_UV_HWP=UVHWP_angle,
             C_QP = C_QP_angle,
-            B_C_HWP = 0, #45 -> 0 to change from psi to phi 
-            C_PCC = 2.3684 # optimal value from phi_plus in config
+            B_C_HWP = 67.5, #0, 45 -> 0 to change from psi to phi 
+            C_PCC =  3.7894 # optimal value from phi_plus in config
         )
 
         # get the density matrix
@@ -445,10 +443,10 @@ if __name__ == '__main__':
         angles = [UVHWP_angle, C_QP_angle, 0] # the 0 is B_C_HWP angle
 
         # save results
-        with open(f"int_state_sweep/rho_('E0', {state_n})_4.npy", 'wb') as f:
+        with open(f"int_state_sweep_WP3_2/rho_('E0', {state_n})_1.npy", 'wb') as f:
             np.save(f, (rho, unc, Su, un_proj, un_proj_unc, state, angles, fidelity, purity))
-        date="5202024"
-        tomo_df = m.output_data(f'int_state_sweep/tomo_data_{state}_{date}.csv')
+        date="6032024"
+        tomo_df = m.output_data(f'int_state_sweep_WP3_2/tomo_data_{state}_{date}.csv')
         # m.close_output()
         
     m.shutdown()

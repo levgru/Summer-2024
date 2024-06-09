@@ -176,11 +176,11 @@ def analyze_rho(rho_actual, verbose = False, id='id'):
         Wp2_min_name = index_names.get(W_T_ls.index(Wp_t2), 'Unknown')
         Wp3_min_name = index_names.get(W_T_ls.index(Wp_t3), 'Unknown')
         
-        # Return the params as well
-        W_param = W_params[0]
-        Wp1_param = W_params[1]
-        Wp2_param = W_params[2]
-        Wp3_param = W_params[3]
+        # Return the params as well, add in if return_params = True in compute_witness call
+        #W_param = W_params[0]
+        #Wp1_param = W_params[1]
+        #Wp2_param = W_params[2]
+        #Wp3_param = W_params[3]
         
         # Find names from dictionary and return them and their values
         return W_min, Wp_t1, Wp_t2, Wp_t3, W_min_name, Wp1_min_name, Wp2_min_name, Wp3_min_name, W_param, Wp1_param, Wp2_param, Wp3_param
@@ -204,7 +204,7 @@ def plot_all(name, etas):
     etas_nice = []
     for i, eta in enumerate(etas):
         # Read in CSV
-        data = pd.read_csv(f'stu_states/{name}_{etas[i]}.csv')
+        data = pd.read_csv(f'pure_and_mixed_states/{name}_{etas[i]}.csv')
         # Extract data
         W = data['W']
         min_Wp = data['min_W_prime']
@@ -224,7 +224,7 @@ def plot_all(name, etas):
     plt.tight_layout()
     ax.legend(fontsize=8, loc = 'upper right')
     ax.set_xlabel('$\chi$', fontsize=12)
-    plt.savefig(f'stu_states/{name}.pdf')
+    plt.savefig(f'pure_and_mixed_states/{name}.pdf')
 
 ####### Main Functions
 
@@ -236,7 +236,7 @@ if __name__ == '__main__':
     num_etas = 1  # the number of etas you choose below
     etas = [np.pi/4] #np.pi/12, np.pi/6, np.pi/4 , np.pi/3
     chis = np.linspace(0.001, np.pi/2, points)
-    file_name = 'psi-phi equal bell' # choose descriptively based on names list
+    file_name = 'psi-phi 65-35 bell' # choose descriptively based on names list
     names = ['phi plus, phi minus', 'psi plus, psi minus']
     probs = [0.65, 0.35] # single value list of 1 if creating a pure state
     plot = True
@@ -290,7 +290,7 @@ if __name__ == '__main__':
             'eta_arr': eta_arr[i],
             'chi': chi_arr[i]
         })
-        data.to_csv(f'stu_states/{file_name}_{etas[i]}.csv', index=False)
+        data.to_csv(f'pure_and_mixed_states/{file_name}_{etas[i]}.csv', index=False)
     if plot == True:
             plot_all(file_name, etas)
         # Save to CSV
